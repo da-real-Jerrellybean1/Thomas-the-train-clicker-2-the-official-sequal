@@ -1,0 +1,1064 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thomas Clicker 3: The Afterlife</title>
+
+<style>
+:root {
+  --red: #e50920;
+  --darkred: #850012;
+  --black: #160307;
+  --panel: #310811;
+  --gold: #ffd45a;
+  --white: #fff1f2;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--white);
+  background:
+    radial-gradient(ellipse at top, #8c071c 0%, #38000b 48%, #100006 100%);
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+header {
+  padding: 18px 10px;
+  background: linear-gradient(90deg,#58000c,#d60020,#58000c);
+  border-bottom: 3px solid #ff5366;
+  box-shadow: 0 4px 20px #000;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(23px, 5vw, 40px);
+  text-shadow: 0 0 15px red;
+}
+
+.subtitle { color: #ffc3cb; margin-top: 6px; }
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+}
+
+button {
+  border: 1px solid #ff6879;
+  background: linear-gradient(#ed1733,#940015);
+  color: white;
+  border-radius: 9px;
+  padding: 11px 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: .15s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.2);
+}
+
+button:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+button.selected {
+  outline: 2px solid var(--gold);
+}
+
+.panel {
+  background: linear-gradient(145deg,#490b19,#21040c);
+  border: 1px solid #a92b40;
+  border-radius: 14px;
+  padding: 16px;
+  margin: 12px auto;
+  width: min(95%, 750px);
+  box-shadow: 0 5px 18px #0008;
+}
+
+.currency {
+  color: var(--gold);
+  font-size: clamp(22px,4vw,34px);
+  font-weight: bold;
+}
+
+.goal {
+  color: #ff9eaa;
+  margin: 8px;
+}
+
+.bar {
+  height: 22px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #130006;
+  border: 1px solid #e64a60;
+  margin: 12px 0;
+}
+
+.barFill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg,#a90020,#ff304f,#ffd45a);
+  transition: width .3s;
+}
+
+#thomasArea {
+  position: relative;
+  width: min(90vw, 380px);
+  height: 260px;
+  margin: 15px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+#thomas {
+  width: 85%;
+  max-height: 230px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 13px #ff263d);
+  transition: .25s;
+  animation: float 2.5s ease-in-out infinite;
+}
+
+#fallback {
+  display: none;
+  font-size: 130px;
+  filter: drop-shadow(0 0 15px red);
+}
+
+.wings {
+  position: absolute;
+  top: 15px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  font-size: 65px;
+  pointer-events: none;
+  filter: drop-shadow(0 0 8px white);
+  transition: opacity 2s, transform 2s;
+}
+
+.wing.left { transform: rotate(-25deg); }
+.wing.right { transform: rotate(25deg) scaleX(-1); }
+
+.tears {
+  position: absolute;
+  top: 43%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 34px;
+  animation: cry .8s infinite;
+  pointer-events: none;
+}
+
+#thomasArea:active #thomas {
+  transform: scale(.94);
+}
+
+@keyframes float {
+  0%,100% { translate: 0 0; }
+  50% { translate: 0 -7px; }
+}
+
+@keyframes cry {
+  0%,100% { translate: 0 0; }
+  50% { translate: 0 8px; }
+}
+
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+#clickText {
+  height: 22px;
+  color: var(--gold);
+  font-weight: bold;
+}
+
+.shopGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap: 10px;
+}
+
+.item {
+  padding: 12px;
+  background: #21040b;
+  border: 1px solid #852033;
+  border-radius: 10px;
+  text-align: left;
+}
+
+.item h3 { margin: 0 0 7px; color: #ff9ba8; }
+.item p { font-size: 13px; color: #e8bdc3; }
+.item button { width: 100%; }
+
+.hidden { display: none !important; }
+
+#cutscene {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: radial-gradient(circle,#a00b22,#160006 75%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 25px;
+}
+
+#cutscene h2 { font-size: clamp(25px,6vw,45px); }
+#cutscene p { max-width: 550px; line-height: 1.6; }
+
+#ending {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle,#ffcf72,#9c142a 65%,#190008);
+  padding: 20px;
+}
+
+#ending h2 {
+  font-size: clamp(30px,7vw,55px);
+  color: white;
+  text-shadow: 0 0 20px gold;
+}
+
+#ending p { max-width: 550px; line-height: 1.6; }
+
+.small { font-size: 12px; color: #dbaeb5; }
+
+select {
+  padding: 8px;
+  background: #23030b;
+  color: white;
+  border: 1px solid red;
+  border-radius: 7px;
+}
+
+footer { padding: 25px; color: #c38a94; font-size: 12px; }
+
+@media(max-width:500px) {
+  nav button { padding: 10px; font-size: 12px; }
+  #thomasArea { height: 220px; }
+  .wings { font-size: 48px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🚂 THOMAS CLICKER 3: THE AFTERLIFE</h1>
+  <div class="subtitle">REDLINE EDITION • A Thomas Clicker Sequel</div>
+</header>
+
+<div id="cutscene">
+  <h2>THE AFTERLIFE</h2>
+  <div style="font-size:90px">🚂 🪽</div>
+  <p id="introText">
+    Thomas is gone. His spirit remains, but he cannot return.
+    His wings have appeared, and his tears will not stop.
+    There is only one way to bring him back...
+  </p>
+  <h2 style="color:#ffd45a">100,000,000,000</h2>
+  <p>Earn enough currency to revive Thomas.</p>
+  <button onclick="startGame()">ENTER THE AFTERLIFE</button>
+</div>
+
+<main id="game" class="hidden">
+
+<nav>
+  <button onclick="showTab('gameTab')">Gameplay</button>
+  <button onclick="showTab('upgradesTab')">Upgrades</button>
+  <button onclick="showTab('trainsTab')">Extra Trains</button>
+  <button onclick="showTab('statsTab')">Statistics</button>
+  <button onclick="showTab('extrasTab')">Extras</button>
+  <button onclick="showTab('devTab')">Developer Tools</button>
+</nav>
+
+<section id="gameTab">
+
+<div class="panel">
+  <div class="currency" id="money">0</div>
+  <div>AFTERLIFE COINS</div>
+  <div class="goal">Revival Goal: 100 Billion</div>
+  <div class="bar"><div class="barFill" id="goalBar"></div></div>
+  <div id="percentage">0% revived</div>
+</div>
+
+<div class="panel">
+  <h2>Thomas needs your help...</h2>
+
+  <div id="thomasArea" onclick="clickThomas()">
+    <div class="wings" id="wings">
+      <span class="wing left">🪽</span>
+      <span class="wing right">🪽</span>
+    </div>
+    <img id="thomas" src="thomas.png" alt="Thomas">
+    <div id="fallback">🚂</div>
+    <div class="tears" id="tears">💧💧</div>
+  </div>
+
+  <div id="clickText">Click Thomas to earn coins!</div>
+  <h3 id="clickPower">Click Power: 1</h3>
+  <h3 id="passive">Passive Income: 0 / second</h3>
+</div>
+
+<div class="panel">
+  <h2>Current Train</h2>
+  <div id="selectedTrain">Original Thomas</div>
+  <div id="trainMultiplier">Multiplier: x1</div>
+</div>
+
+<div class="panel">
+  <h2>Quick Progress</h2>
+  <p id="progressMessage">Thomas is waiting for you.</p>
+</div>
+
+</section>
+
+<section id="upgradesTab" class="hidden">
+  <div class="panel">
+    <h2>⚙️ Upgrade Shop</h2>
+    <p>Every upgrade makes earning the 100 billion coins easier.</p>
+    <div id="upgradeList" class="shopGrid"></div>
+  </div>
+</section>
+
+<section id="trainsTab" class="hidden">
+  <div class="panel">
+    <h2>🚂 Extra Trains</h2>
+    <p>Unlock trains to multiply your earnings.</p>
+    <div id="trainList" class="shopGrid"></div>
+  </div>
+</section>
+
+<section id="statsTab" class="hidden">
+  <div class="panel">
+    <h2>📊 Statistics</h2>
+    <p id="stats"></p>
+  </div>
+</section>
+
+<section id="extrasTab" class="hidden">
+  <div class="panel">
+    <h2>🌟 Extras</h2>
+    <p id="extrasMessage">Save Thomas to unlock the Afterlife Extras collection.</p>
+    <div id="phaseGallery" class="shopGrid"></div>
+  </div>
+</section>
+
+<section id="devTab" class="hidden">
+  <div class="panel">
+    <h2>🛠 Developer Tools</h2>
+    <p class="small">Testing tools. These can change your saved progress.</p>
+
+    <button onclick="devMoney()">Add 1 Billion Coins</button>
+    <button onclick="devMoney(-1000000000)">Remove 1 Billion Coins</button>
+    <button onclick="devRevive()">Trigger Revival</button>
+    <button onclick="devUnlock()">Unlock All Trains</button>
+    <button onclick="devReset()">Reset Game</button>
+
+    <p>Set coins to a specific amount:</p>
+    <input id="devAmount" type="number" min="0" placeholder="Enter amount">
+    <button onclick="setDevMoney()">Set Coins</button>
+
+    <p>Sound and effects:</p>
+    <button onclick="toggleSound()" id="soundButton">Sound: ON</button>
+    <button onclick="toggleEffects()" id="effectsButton">Effects: ON</button>
+  </div>
+</section>
+
+</main>
+
+<div id="ending" class="hidden">
+  <h2>THOMAS HAS RETURNED!</h2>
+  <div style="font-size:100px">🚂 ✨</div>
+  <p id="endingText">
+    The light has brought Thomas back.
+    His wings have faded away, and his tears have stopped.
+    You saved him!
+  </p>
+  <h3>THE AFTERLIFE IS COMPLETE</h3>
+  <button onclick="continueGame()">CONTINUE CLICKER GAME</button>
+  <button onclick="endGame()">END GAME</button>
+</div>
+
+<footer>
+  Thomas Clicker 3: The Afterlife • Redline Edition<br>
+  Your progress automatically saves in this browser.
+</footer>
+
+<script>
+"use strict";
+
+// ======================================
+// GAME DATA
+// ======================================
+
+const GOAL = 100000000000;
+
+const upgrades = [
+  {
+    name:"Heavenly Clicking",
+    cost:0,
+    desc:"Your first free upgrade.",
+    click:1,
+    passive:0
+  },
+  {
+    name:"Ghostly Fingers",
+    cost:0,
+    desc:"Increase clicking power.",
+    click:2,
+    passive:0
+  },
+  {
+    name:"Spirit Energy",
+    cost:0,
+    desc:"Gain more power from each click.",
+    click:3,
+    passive:0
+  },
+  {
+    name:"Afterlife Engine",
+    cost:0,
+    desc:"Generate a little passive income.",
+    click:0,
+    passive:1
+  },
+  {
+    name:"Soul Collector",
+    cost:0,
+    desc:"Increase your passive earnings.",
+    click:0,
+    passive:3
+  },
+  {
+    name:"Angel Boost",
+    cost:250,
+    desc:"Increase click power.",
+    click:10,
+    passive:0
+  },
+  {
+    name:"Heavenly Factory",
+    cost:1000,
+    desc:"Generate coins automatically.",
+    click:0,
+    passive:20
+  },
+  {
+    name:"Golden Whistle",
+    cost:5000,
+    desc:"A powerful click upgrade.",
+    click:100,
+    passive:0
+  },
+  {
+    name:"Spirit Railway",
+    cost:20000,
+    desc:"Increase passive income.",
+    click:0,
+    passive:250
+  },
+  {
+    name:"Divine Locomotive",
+    cost:100000,
+    desc:"A huge click improvement.",
+    click:1000,
+    passive:0
+  },
+  {
+    name:"Soul Furnace",
+    cost:500000,
+    desc:"Generate a massive amount of coins.",
+    click:0,
+    passive:5000
+  },
+  {
+    name:"Celestial Accelerator",
+    cost:2500000,
+    desc:"Increase clicking power.",
+    click:25000,
+    passive:0
+  },
+  {
+    name:"Heavenly Railway",
+    cost:15000000,
+    desc:"Increase automatic production.",
+    click:0,
+    passive:150000
+  },
+  {
+    name:"Resurrection Energy",
+    cost:100000000,
+    desc:"Increase clicking power enormously.",
+    click:1000000,
+    passive:0
+  },
+  {
+    name:"Angel Army",
+    cost:500000000,
+    desc:"Generate massive passive income.",
+    click:0,
+    passive:5000000
+  },
+  {
+    name:"Divine Power",
+    cost:2500000000,
+    desc:"A gigantic click upgrade.",
+    click:25000000,
+    passive:0
+  },
+  {
+    name:"Eternal Engine",
+    cost:10000000000,
+    desc:"Generate billions over time.",
+    click:0,
+    passive:100000000
+  },
+  {
+    name:"The Final Miracle",
+    cost:50000000000,
+    desc:"Your final upgrade before revival.",
+    click:500000000,
+    passive:0
+  }
+];
+
+const trains = [
+  {name:"Original Thomas",color:"blue",price:0,mult:1,filter:"none",desc:"The original locomotive."},
+  {name:"Ruby Thomas",color:"red",price:1000,mult:1.5,filter:"hue-rotate(140deg)",desc:"A red-hot locomotive."},
+  {name:"Golden Thomas",color:"gold",price:10000,mult:2,filter:"sepia(1) saturate(4)",desc:"A golden train."},
+  {name:"Emerald Thomas",color:"green",price:100000,mult:3,filter:"hue-rotate(75deg)",desc:"A train of emerald energy."},
+  {name:"Shadow Thomas",color:"black",price:1000000,mult:5,filter:"brightness(.35)",desc:"A mysterious train."},
+  {name:"Ice Thomas",color:"cyan",price:10000000,mult:8,filter:"hue-rotate(180deg)",desc:"A frozen locomotive."},
+  {name:"Galaxy Thomas",color:"purple",price:100000000,mult:15,filter:"hue-rotate(240deg) saturate(2)",desc:"A train from another universe."},
+  {name:"Heaven Thomas",color:"white",price:1000000000,mult:30,filter:"brightness(1.4) sepia(.2)",desc:"A heavenly locomotive."}
+];
+
+// ======================================
+// GAME STATE
+// ======================================
+
+let state = {
+  coins:0,
+  totalEarned:0,
+  totalClicks:0,
+  clickPower:1,
+  passive:0,
+  upgrades:[],
+  unlockedTrains:[0],
+  selectedTrain:0,
+  revived:false,
+  ended:false,
+  sound:true,
+  effects:true,
+  started:false
+};
+
+function loadGame() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("thomasAfterlifeSave"));
+    if (!saved) return;
+
+    state = {...state,...saved};
+
+    state.coins = Math.max(0,Number(state.coins)||0);
+    state.totalEarned = Math.max(0,Number(state.totalEarned)||0);
+    state.totalClicks = Math.max(0,Number(state.totalClicks)||0);
+    state.upgrades = Array.isArray(state.upgrades) ? state.upgrades : [];
+    state.unlockedTrains = Array.isArray(state.unlockedTrains) ? state.unlockedTrains : [0];
+    state.unlockedTrains.push(0);
+    state.unlockedTrains = [...new Set(state.unlockedTrains)];
+    state.selectedTrain = trains[state.selectedTrain] ? state.selectedTrain : 0;
+  } catch(error) {
+    console.warn("Save could not be loaded.",error);
+  }
+}
+
+function saveGame() {
+  try {
+    localStorage.setItem("thomasAfterlifeSave",JSON.stringify(state));
+  } catch(error) {
+    console.warn("Save could not be stored.",error);
+  }
+}
+
+// ======================================
+// AUDIO
+// ======================================
+
+let audioContext;
+
+function beep(frequency=440,duration=.1,type="sine") {
+  if (!state.sound) return;
+
+  try {
+    audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
+
+    if(audioContext.state === "suspended") audioContext.resume();
+
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    oscillator.type = type;
+    oscillator.frequency.value = frequency;
+    gain.gain.setValueAtTime(.06,audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.001,audioContext.currentTime+duration);
+
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime+duration);
+  } catch(e) {}
+}
+
+// ======================================
+// CORE GAMEPLAY
+// ======================================
+
+function multiplier() {
+  return trains[state.selectedTrain].mult;
+}
+
+function addCoins(amount) {
+  if (!Number.isFinite(amount) || amount <= 0) return;
+
+  state.coins += amount;
+  state.totalEarned += amount;
+  updateUI();
+}
+
+function clickThomas() {
+  if (!state.started || state.ended) return;
+
+  const amount = state.clickPower * multiplier();
+  addCoins(amount);
+  state.totalClicks++;
+
+  beep(400+Math.random()*180,.06);
+
+  document.getElementById("clickText").textContent =
+    "+"+format(amount)+" coins!";
+
+  if(state.effects) {
+    const area = document.getElementById("thomasArea");
+    area.style.animation = "shake .12s";
+    setTimeout(()=>area.style.animation="",120);
+  }
+
+  if(Math.random()<.012) evilLaugh();
+
+  checkRevival();
+}
+
+function evilLaugh() {
+  if(state.revived || !state.sound) return;
+  beep(100,.3,"sawtooth");
+  setTimeout(()=>beep(85,.4,"sawtooth"),180);
+}
+
+function buyUpgrade(index) {
+  const upgrade = upgrades[index];
+  if(!upgrade || state.upgrades.includes(index)) return;
+
+  const cost = upgrade.cost;
+
+  if(index>=5) {
+    const groupStart = 5+Math.floor((index-5)/5)*5;
+    const groupEnd = Math.min(groupStart+5,upgrades.length);
+
+    if(index>=groupEnd || !upgrades.slice(groupStart,index).every(i=>state.upgrades.includes(i))) {
+      return;
+    }
+  }
+
+  if(state.coins < cost) return;
+
+  state.coins -= cost;
+  state.upgrades.push(index);
+  state.clickPower += upgrade.click;
+  state.passive += upgrade.passive;
+
+  beep(650,.15);
+  renderUpgrades();
+  updateUI();
+  saveGame();
+}
+
+function buyTrain(index) {
+  const train = trains[index];
+  if(!train) return;
+
+  if(!state.unlockedTrains.includes(index)) {
+    if(state.coins < train.price) return;
+
+    state.coins -= train.price;
+    state.unlockedTrains.push(index);
+    beep(750,.2);
+  }
+
+  state.selectedTrain = index;
+  renderTrains();
+  updateUI();
+  saveGame();
+}
+
+function checkRevival() {
+  if(state.coins >= GOAL && !state.revived) reviveThomas();
+}
+
+function reviveThomas() {
+  if(state.revived) return;
+
+  state.revived = true;
+  state.coins = Math.max(state.coins,GOAL);
+  saveGame();
+
+  const wings = document.getElementById("wings");
+  const tears = document.getElementById("tears");
+  const img = document.getElementById("thomas");
+
+  document.getElementById("game").classList.remove("hidden");
+  document.getElementById("ending").classList.add("hidden");
+
+  showTab("gameTab");
+
+  document.getElementById("clickText").textContent =
+    "THE MIRACLE IS HAPPENING!";
+
+  wings.style.opacity = "0";
+  wings.style.transform = "translateY(-100px) scale(1.5)";
+  tears.style.opacity = "0";
+
+  img.style.filter = "brightness(2) drop-shadow(0 0 30px gold)";
+
+  beep(523,.3);
+  setTimeout(()=>beep(659,.3),300);
+  setTimeout(()=>beep(784,.5),600);
+
+  setTimeout(()=>{
+    document.getElementById("ending").classList.remove("hidden");
+    updateUI();
+    saveGame();
+  },2500);
+}
+
+function continueGame() {
+  document.getElementById("ending").classList.add("hidden");
+  state.ended = false;
+  updateUI();
+  saveGame();
+}
+
+function endGame() {
+  state.ended = true;
+  saveGame();
+  document.getElementById("endingText").textContent =
+    "You saved Thomas. Your adventure is complete. Thank you for playing!";
+}
+
+function resetGame() {
+  if(!confirm("Are you sure you want to erase ALL saved progress?")) return;
+
+  localStorage.removeItem("thomasAfterlifeSave");
+  location.reload();
+}
+
+// ======================================
+// UI
+// ======================================
+
+function format(n) {
+  if(!Number.isFinite(n)) return "0";
+
+  if(n>=1e12) return (n/1e12).toFixed(2)+"T";
+  if(n>=1e9) return (n/1e9).toFixed(2)+"B";
+  if(n>=1e6) return (n/1e6).toFixed(2)+"M";
+  if(n>=1000) return (n/1000).toFixed(2)+"K";
+
+  return Math.floor(n).toLocaleString();
+}
+
+function updateUI() {
+  document.getElementById("money").textContent=format(state.coins);
+
+  const percent=Math.min(100,state.coins/GOAL*100);
+
+  document.getElementById("goalBar").style.width=percent+"%";
+  document.getElementById("percentage").textContent=
+    percent.toFixed(5)+"% revived";
+
+  document.getElementById("clickPower").textContent=
+    "Click Power: "+format(state.clickPower*multiplier());
+
+  document.getElementById("passive").textContent=
+    "Passive Income: "+format(state.passive*multiplier())+" / second";
+
+  document.getElementById("selectedTrain").textContent=
+    trains[state.selectedTrain].name;
+
+  document.getElementById("trainMultiplier").textContent=
+    "Multiplier: x"+trains[state.selectedTrain].mult;
+
+  document.getElementById("stats").innerHTML=
+    "Total earned: "+format(state.totalEarned)+
+    "<br>Total clicks: "+state.totalClicks+
+    "<br>Click power: "+format(state.clickPower)+
+    "<br>Passive income: "+format(state.passive)+
+    "<br>Purchased upgrades: "+state.upgrades.length+
+    "<br>Unlocked trains: "+state.unlockedTrains.length+
+    "<br>Thomas revived: "+(state.revived?"YES":"NO");
+
+  document.getElementById("progressMessage").textContent=
+    state.revived
+    ? "Thomas is alive again! Keep collecting coins."
+    : percent<10
+      ? "Thomas is waiting. Every click brings him closer."
+      : percent<50
+        ? "The revival energy is building!"
+        : percent<90
+          ? "Thomas is almost back! Keep going!"
+          : "THE REVIVAL IS NEAR!";
+
+  document.getElementById("wings").style.display=
+    state.revived?"none":"flex";
+
+  document.getElementById("tears").style.display=
+    state.revived?"none":"block";
+
+  document.getElementById("thomas").style.filter=
+    state.revived
+    ? "drop-shadow(0 0 18px gold) "+trains[state.selectedTrain].filter
+    : "drop-shadow(0 0 13px red) "+trains[state.selectedTrain].filter;
+
+  document.getElementById("soundButton").textContent=
+    "Sound: "+(state.sound?"ON":"OFF");
+
+  document.getElementById("effectsButton").textContent=
+    "Effects: "+(state.effects?"ON":"OFF");
+
+  document.getElementById("extrasMessage").textContent=
+    state.revived
+    ? "Thomas has been saved! Explore the different stages of his journey."
+    : "Save Thomas to unlock the Afterlife Extras collection.";
+
+  renderGallery();
+}
+
+function showTab(tab) {
+  document.querySelectorAll("main section").forEach(section=>{
+    section.classList.add("hidden");
+  });
+
+  document.getElementById(tab).classList.remove("hidden");
+}
+
+function renderUpgrades() {
+  const list=document.getElementById("upgradeList");
+  list.innerHTML="";
+
+  upgrades.forEach((u,i)=>{
+    const owned=state.upgrades.includes(i);
+
+    const groupStart=i<5?0:5+Math.floor((i-5)/5)*5;
+    const previous= i<5 || upgrades.slice(groupStart,i)
+      .every((_,j)=>state.upgrades.includes(groupStart+j));
+
+    const unlocked= i<5 || previous;
+    const affordable=state.coins>=u.cost;
+
+    const card=document.createElement("div");
+    card.className="item";
+
+    card.innerHTML=`
+      <h3>${i+1}. ${u.name}</h3>
+      <p>${u.desc}</p>
+      <p>Click: +${format(u.click)} | Passive: +${format(u.passive)}/s</p>
+      <p>Price: ${format(u.cost)}</p>
+      <button ${owned||!unlocked||!affordable?"disabled":""}>
+        ${owned?"PURCHASED":!unlocked?"LOCKED - BUY PREVIOUS UPGRADES":"BUY UPGRADE"}
+      </button>`;
+
+    card.querySelector("button").addEventListener("click",()=>buyUpgrade(i));
+    list.appendChild(card);
+  });
+}
+
+function renderTrains() {
+  const list=document.getElementById("trainList");
+  list.innerHTML="";
+
+  trains.forEach((t,i)=>{
+    const unlocked=state.unlockedTrains.includes(i);
+    const selected=state.selectedTrain===i;
+
+    const card=document.createElement("div");
+    card.className="item";
+
+    card.innerHTML=`
+      <h3>${t.name}</h3>
+      <p style="color:${t.color}">Train color: ${t.color}</p>
+      <p>${t.desc}</p>
+      <p>Multiplier: x${t.mult}</p>
+      <p>${unlocked?"Unlocked":"Price: "+format(t.price)}</p>
+      <button ${!unlocked&&state.coins<t.price?"disabled":""}>
+        ${selected?"SELECTED":unlocked?"SELECT TRAIN":"UNLOCK TRAIN"}
+      </button>`;
+
+    card.querySelector("button").addEventListener("click",()=>buyTrain(i));
+    list.appendChild(card);
+  });
+}
+
+function renderGallery() {
+  const gallery=document.getElementById("phaseGallery");
+  gallery.innerHTML="";
+
+  if(!state.revived) return;
+
+  const phases=[
+    ["The Fallen Thomas","Thomas has passed away and entered the afterlife."],
+    ["Angel Thomas","Thomas has wings and cannot stop crying."],
+    ["The Revival","The light begins removing his wings."],
+    ["Restored Thomas","Thomas is alive again and no longer crying."]
+  ];
+
+  phases.forEach((phase,i)=>{
+    const card=document.createElement("div");
+    card.className="item";
+    card.innerHTML=`
+      <h3>${phase[0]}</h3>
+      <div style="font-size:45px">${i===3?"🚂": "🚂 🪽"}</div>
+      <p>${phase[1]}</p>`;
+    gallery.appendChild(card);
+  });
+}
+
+// ======================================
+// DEVELOPER TOOLS
+// ======================================
+
+function devMoney(amount=1000000000) {
+  addCoins(amount);
+  saveGame();
+}
+
+function setDevMoney() {
+  const amount=Number(document.getElementById("devAmount").value);
+
+  if(!Number.isFinite(amount)||amount<0) return;
+
+  state.coins=amount;
+  updateUI();
+  saveGame();
+}
+
+function devRevive() {
+  state.coins=GOAL;
+  reviveThomas();
+}
+
+function devUnlock() {
+  state.unlockedTrains=trains.map((_,i)=>i);
+  renderTrains();
+  updateUI();
+  saveGame();
+}
+
+function devReset() {
+  resetGame();
+}
+
+function toggleSound() {
+  state.sound=!state.sound;
+  updateUI();
+  saveGame();
+}
+
+function toggleEffects() {
+  state.effects=!state.effects;
+  updateUI();
+  saveGame();
+}
+
+// ======================================
+// STARTUP AND AUTOMATIC PRODUCTION
+// ======================================
+
+function startGame() {
+  document.getElementById("cutscene").classList.add("hidden");
+  document.getElementById("game").classList.remove("hidden");
+
+  state.started=true;
+
+  renderUpgrades();
+  renderTrains();
+  updateUI();
+  saveGame();
+
+  if(state.revived) {
+    document.getElementById("wings").style.display="none";
+    document.getElementById("tears").style.display="none";
+    document.getElementById("thomas").style.filter=
+      "drop-shadow(0 0 18px gold) "+trains[state.selectedTrain].filter;
+  }
+
+  if(state.coins>=GOAL&&!state.revived) {
+    reviveThomas();
+  }
+}
+
+setInterval(()=>{
+  if(!state.started||state.ended) return;
+
+  const income=state.passive*multiplier();
+
+  if(income>0) addCoins(income);
+
+  checkRevival();
+  saveGame();
+},1000);
+
+// Check for missing Thomas image.
+document.getElementById("thomas").addEventListener("error",()=>{
+  document.getElementById("thomas").style.display="none";
+  document.getElementById("fallback").style.display="block";
+});
+
+// Initialize
+loadGame();
+renderUpgrades();
+renderTrains();
+updateUI();
+
+</script>
+</body>
+</html>
